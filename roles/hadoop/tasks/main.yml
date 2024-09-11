@@ -1,0 +1,180 @@
+---
+- name: Ensure hadoop group exists
+  group:
+    name: hadoop
+    state: present
+
+- name: Ensure hadoop user exists
+  user:
+    name: hadoop
+    group: hadoop
+    create_home: yes
+    shell: /bin/bash
+    password: "{{ 'root' | password_hash('sha512') }}"
+    state: present
+
+- name: Grant hadoop user sudo privileges
+  copy:
+    content: "hadoop ALL=(ALL) NOPASSWD:ALL"
+    dest: /etc/sudoers.d/hadoop
+    mode: '0440'
+
+- name: Download Hadoop
+  get_url:
+    url: "https://downloads.apache.org/hadoop/common/hadoop-{{ hadoop_version }}/hadoop-{{ hadoop_version }}.tar.gz"
+    dest: "/tmp/hadoop-{{ hadoop_version }}.tar.gz"
+
+- name: Extract Hadoop
+  unarchive:
+    src: "/tmp/hadoop-{{ hadoop_version }}.tar.gz"
+    dest: "/opt"
+    remote_src: yes
+
+- name: Create Hadoop symlink
+  file:
+    src: "/opt/hadoop-{{ hadoop_version }}"
+    dest: "{{ hadoop_install_dir }}"
+    state: link
+
+- name: Change ownership of Hadoop directory
+  file:
+    path: "{{ hadoop_install_dir }}"
+    state: directory
+    owner: hadoop
+    group: hadoop
+    recurse: yes
+
+- name: Change ownership of Hadoop directory
+  shell: "chown hadoop:hadoop {{hadoop_install_dir}} "
+  become: yes
+
+- name: Create Hadoop directory in /var/lib
+  file:
+    path: "{{ hadoop_hdfs_site_dfs }}"
+    state: directory
+    owner: hadoop
+    group: hadoop
+    mode: 0755
+  become_user: hadoop
+
+- name: Create Hadoop name directory
+  command: "mkdir -p {{ hadoop_hdfs_site_dfs_namenode_name_dir }}"
+  become: yes
+
+- name: Change ownership of Hadoop name directory
+  command: "chown hadoop:hadoop {{ hadoop_hdfs_site_dfs_namenode_name_dir }}"
+  become: yes
+
+- name: Change ownership of Hadoop name directory
+  file:
+    path: "{{ hadoop_hdfs_site_dfs_namenode_name_dir }}"
+    state: directory
+    owner: hadoop
+    group: hadoop
+    mode: 0755
+  become_user: hadoop
+
+
+- name: Create Hadoop data directory
+  command: "mkdir -p {{ hadoop_hdfs_site_dfs_datanode_data_dir }}"
+  become: yes
+
+- name: Change ownership of Hadoop name directory
+  command: "chown hadoop:hadoop {{ hadoop_hdfs_site_dfs_datanode_data_dir }}"
+  become: yes
+
+- name: Change ownership of Hadoop data directory
+  file:
+    path: "{{ hadoop_hdfs_site_dfs_datanode_data_dir }}"
+    state: directory
+    owner: hadoop
+    group: hadoop
+    mode: 0755
+  become_user: hadoop
+
+- name: Create Hadoop jn directory
+  command: "mkdir -p {{ hadoop_hdfs_site_dfs_jn }}"
+  become: yes
+
+
+- name: Change ownership of Hadoop directory in /var/lib
+  command: "chown -R hadoop:hadoop {{ hadoop_hdfs_site_dfs }}/"
+  become: yes
+
+- name: Change ownership of Hadoop journal directory
+  file:
+    path: "{{ hadoop_hdfs_site_dfs_jn }}"
+    state: directory
+    owner: hadoop
+    group: hadoop
+    mode: 0755
+  become_user: hadoop
+
+- name: Set PDSH in hadoop user's profile
+  lineinfile:
+    path: /home/hadoop/.bashrc
+    line: 'export PDSH_RCMD_TYPE=ssh'
+    state: present
+
+- name: Set JAVA_HOME in hadoop user's profile
+  lineinfile:
+    path: /home/hadoop/.bashrc
+    line: 'export JAVA_HOME=/usr/lib/jvm/java-{{java_version}}-openjdk-amd64'
+    state: present
+
+- name: Set Hadoop_HOME in hadoop user's profile
+  lineinfile:
+    path: /home/hadoop/.bashrc
+    line: 'export HADOOP_HOME="{{hadoop_install_dir}}"'
+    state: present
+
+- name: Set Hadoop_COMMON_HOME in hadoop user's profile
+  lineinfile:
+    path: /home/hadoop/.bashrc
+    line: 'export HADOOP_COMMON_HOME=$HADOOP_HOME'
+    state: present
+
+- name: Set Hadoop_CONF_DIR in hadoop user's profile
+  lineinfile:
+    path: /home/hadoop/.bashrc
+    line: 'export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop'
+    state: present
+
+- name: Set Hadoop_HDFS_HOME in hadoop user's profile
+  lineinfile:
+    path: /home/hadoop/.bashrc
+    line: 'export HADOOP_HDFS_HOME=$HADOOP_HOME'
+    state: present
+
+- name: Set Hadoop_MAPRED_HOME in hadoop user's profile
+  lineinfile:
+    path: /home/hadoop/.bashrc
+    line: 'export HADOOP_MAPRED_HOME=$HADOOP_HOME'
+    state: present
+
+- name: Set Hadoop_YARN_HOME in hadoop user's profile
+  lineinfile:
+    path: /home/hadoop/.bashrc
+    line: 'export HADOOP_YARN_HOME=$HADOOP_HOME'
+    state: present
+
+- name: Ensure necessary environment variables are set
+  become: yes
+  become_user: hadoop
+  lineinfile:
+    path: "/home/hadoop/.bashrc"
+    line: 'export YARN_RESOURCEMANAGER_USER=hadoop'
+    create: yes
+
+- name: Ensure PATH is set
+  become: yes
+  become_user: hadoop
+  lineinfile:
+    path: "/home/hadoop/.bashrc"
+    line: 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin'
+    create: yes
+
+- name: Source hadoop user's profile
+  become: yes
+  become_user: hadoop
+  shell: . /home/hadoop/.bashrc

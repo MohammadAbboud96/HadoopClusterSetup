@@ -1,0 +1,32 @@
+---
+- name: Configure Hadoop core-site.xml
+  template:
+    src: "core-site.xml.j2"
+    dest: "{{ hadoop_conf_dir }}/core-site.xml"
+
+- name: Configure Hadoop hdfs-site.xml
+  template:
+    src: "hdfs-site.xml.j2"
+    dest: "{{ hadoop_conf_dir }}/hdfs-site.xml"
+
+- name: Configure Hadoop yarn-site.xml
+  template:
+    src: "yarn-site.xml.j2"
+    dest: "{{ hadoop_conf_dir }}/yarn-site.xml"
+
+- name: Configure Hadoop hadoop-env.sh
+  template:
+    src: "hadoop-env.sh.j2"
+    dest: "{{ hadoop_conf_dir }}/hadoop-env.sh"
+
+- name: Configure Hadoop workers
+  template:
+    src: "workers.j2"
+    dest: "{{ hadoop_conf_dir }}/workers"
+
+- name: Format the HDFS namenode
+  command: "sudo echo 'Y' | /opt/hadoop/bin/hdfs namenode -format"
+  become: yes
+  become_user: hadoop
+  args:
+    creates: "{{ hadoop_hdfs_site_dfs_namenode_name_dir }}/current"

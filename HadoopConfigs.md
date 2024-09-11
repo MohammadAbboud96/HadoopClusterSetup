@@ -1,0 +1,46 @@
+- ## Before running the ansible playbook 
+- ### Generate and Copy the SSH keys between the machine clusters
+    - Generate SSH Key for each node
+        -     ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+  
+    - Copy the Public Key to Host Machines
+        -      ssh-copy-id your_username@server1 
+        -      ssh-copy-id your_username@server2
+        -      ssh-copy-id your_username@server3
+
+    - Restart sshd service in all nodes
+      -      sudo service sshd restart
+    
+- ### Edit hostname and hosts files for each machine in the cluster
+  - In the /etc/hostname file change the name of the machine
+  - In the /etc/hosts file add all the cluster machine ips and their hostnames as follows:
+    - machine-IP hostname
+      -     192.168.0.X master
+      -     192.168.0.Y secondary-master
+      -     192.168.0.Z data-node-1
+  - Note these steps requires reboot
+
+- ## After running the ansible playbook
+- ### Start Hadoop Daemons
+  -  Start the journalnode on all the nodes 
+     -    hdfs --daemon start journalnode
+  - Format the active name node
+    -     hdfs namenode -format
+  - Start the namenode 
+    -     hdfs --daemon start namenode
+  - Copy the HDFS Meta data from active name node to standby namenode
+    -     hdfs namenode -bootstrapStandby
+  - Start the namenode on the Secondary master machine
+    -     hdfs --daemon start namenode 
+  - Start the data node daemon on data node machines
+    -     hdfs --daemon start datanode
+  - Format the zookeeper fail over controller in Active namenode
+    -     hdfs zkfc -formatZK
+  - Start the ZKFC in Active namenode
+    -     hdfs --daemon start zkfc
+   - Format the zookeeper fail over controller in StandBy namenode 
+     -     hdfs zkfc -formatZK
+  - Start the ZKFC in Standby namenode
+    -     hdfs --daemon start zkfc
+  - Check the status of the active and standby nodes
+    -     hdfs haadmin –getServiceState <hostname>

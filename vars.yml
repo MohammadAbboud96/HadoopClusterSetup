@@ -1,0 +1,49 @@
+---
+java_version: "17"
+
+cluster_name: "ha-cluster"
+name_node: "master"
+standby_name_node: "secondary-master"
+name_node_ip: "{{ groups['master'][0] }}"
+standby_name_node_ip: "{{ groups['secondary_master'][0] }}"
+data_node_1_ip: "{{ groups['datanodes'][0] }}"
+data_node_2_ip: "{{ groups['datanodes'][1] }}"
+data_node_3_ip: "{{ groups['datanodes'][2] }}"
+data_node_4_ip: "{{ groups['datanodes'][3] }}"
+
+hadoop_version: "3.4.0"
+hadoop_install_dir: "/opt/hadoop"
+hadoop_conf_dir: "{{ hadoop_install_dir }}/etc/hadoop"
+
+zookeeper_version: "3.7.2"
+zookeeper_install_dir: "/opt/zookeeper"
+zookeeper_data_dir: "/var/lib/zookeeper"
+
+zookeeper_myid: |
+  {% if inventory_hostname == groups['master'][0] %}
+  1
+  {% elif inventory_hostname == groups['secondary_master'][0] %}
+  2
+  {% elif inventory_hostname in groups['datanodes'] %}
+  {{ groups['datanodes'].index(inventory_hostname) + 3 }}
+  {% endif %}
+
+zookeeper_servers: |
+  {% for host in groups['zookeepers'] %}
+  server.{{ groups['zookeepers'].index(host) + 1 }}={{ host }}:2888:3888
+  {% endfor %}
+
+# Configuration for core-site.xml
+hadoop_core_site_fs_defaultFS: "hdfs://{{ groups['master'][0] }}"
+
+# Configuration for hdfs-site.xml
+hadoop_hdfs_site_dfs_replication: "3"
+hadoop_hdfs_site_dfs: "/var/lib/hadoop-hdfs/"
+hadoop_hdfs_site_dfs_namenode_name_dir: "/var/lib/hadoop-hdfs/namenode"
+hadoop_hdfs_site_dfs_datanode_data_dir: "/var/lib/hadoop-hdfs/datanode"
+hadoop_hdfs_site_dfs_jn: "/var/lib/hadoop-hdfs/jn"
+
+# Configuration for yarn-site.xml
+hadoop_yarn_site_yarn_resourcemanager_hostname: "{{ groups['master'][0] }}"
+hadoop_yarn_site_yarn_nodemanager_aux_services: "mapreduce_shuffle"
+hadoop_yarn_site_yarn_nodemanager_aux_services_mapreduce_shuffle_class: "org.apache.hadoop.mapred.ShuffleHandler"

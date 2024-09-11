@@ -1,0 +1,14 @@
+<configuration>
+  <property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>{{ hadoop_yarn_site_yarn_resourcemanager_hostname }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>{{ hadoop_yarn_site_yarn_nodemanager_aux_services }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+    <value>{{ hadoop_yarn_site_yarn_nodemanager_aux_services_mapreduce_shuffle_class }}</value>
+  </property>
+</configuration>
