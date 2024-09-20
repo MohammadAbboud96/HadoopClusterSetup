@@ -1,24 +1,4 @@
 ---
-- name: Ensure hadoop group exists
-  group:
-    name: hadoop
-    state: present
-
-- name: Ensure hadoop user exists
-  user:
-    name: hadoop
-    group: hadoop
-    create_home: yes
-    shell: /bin/bash
-    password: "{{ 'root' | password_hash('sha512') }}"
-    state: present
-
-- name: Grant hadoop user sudo privileges
-  copy:
-    content: "hadoop ALL=(ALL) NOPASSWD:ALL"
-    dest: /etc/sudoers.d/hadoop
-    mode: '0440'
-
 - name: Download Hadoop
   get_url:
     url: "https://downloads.apache.org/hadoop/common/hadoop-{{ hadoop_version }}/hadoop-{{ hadoop_version }}.tar.gz"
