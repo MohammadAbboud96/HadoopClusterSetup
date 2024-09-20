@@ -5,6 +5,7 @@
   vars_files:
     - vars.yml
   roles:
+    - create-user
     - java
     - zookeeper
     - hadoop
