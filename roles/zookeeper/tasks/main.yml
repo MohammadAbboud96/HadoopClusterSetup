@@ -10,6 +10,14 @@
     remote_src: yes
 #  become_user: hadoop
 
+
+- name: Create Zookeeper symlink
+  file:
+    src: "/opt/apache-zookeeper-{{ zookeeper_version }}-bin"
+    dest: "{{ zookeeper_install_dir }}"
+    state: link
+#  become_user: hadoop
+
 - name: Change ownership of Zookeeper directory
   file:
     path: "{{ zookeeper_install_dir }}"
@@ -18,12 +26,6 @@
     group: hadoop
     recurse: yes
 
-- name: Create Zookeeper symlink
-  file:
-    src: "/opt/apache-zookeeper-{{ zookeeper_version }}-bin"
-    dest: "{{ zookeeper_install_dir }}"
-    state: link
-  become_user: hadoop
 
 - name: Create Zookeeper data directory
   file:

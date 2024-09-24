@@ -35,60 +35,35 @@
     owner: hadoop
     group: hadoop
     mode: 0755
-  become_user: hadoop
+    recurse: yes
 
 - name: Create Hadoop name directory
-  command: "mkdir -p {{ hadoop_hdfs_site_dfs_namenode_name_dir }}"
-  become: yes
-
-- name: Change ownership of Hadoop name directory
-  command: "chown hadoop:hadoop {{ hadoop_hdfs_site_dfs_namenode_name_dir }}"
-  become: yes
-
-- name: Change ownership of Hadoop name directory
   file:
     path: "{{ hadoop_hdfs_site_dfs_namenode_name_dir }}"
     state: directory
     owner: hadoop
     group: hadoop
     mode: 0755
-  become_user: hadoop
-
+    recurse: yes
 
 - name: Create Hadoop data directory
-  command: "mkdir -p {{ hadoop_hdfs_site_dfs_datanode_data_dir }}"
-  become: yes
-
-- name: Change ownership of Hadoop name directory
-  command: "chown hadoop:hadoop {{ hadoop_hdfs_site_dfs_datanode_data_dir }}"
-  become: yes
-
-- name: Change ownership of Hadoop data directory
   file:
     path: "{{ hadoop_hdfs_site_dfs_datanode_data_dir }}"
     state: directory
     owner: hadoop
     group: hadoop
     mode: 0755
-  become_user: hadoop
-
-- name: Create Hadoop jn directory
-  command: "mkdir -p {{ hadoop_hdfs_site_dfs_jn }}"
-  become: yes
+    recurse: yes
 
 
-- name: Change ownership of Hadoop directory in /var/lib
-  command: "chown -R hadoop:hadoop {{ hadoop_hdfs_site_dfs }}/"
-  become: yes
-
-- name: Change ownership of Hadoop journal directory
+- name: Create Hadoop journal directory
   file:
     path: "{{ hadoop_hdfs_site_dfs_jn }}"
     state: directory
     owner: hadoop
     group: hadoop
     mode: 0755
-  become_user: hadoop
+    recurse: yes
 
 - name: Set PDSH in hadoop user's profile
   lineinfile:

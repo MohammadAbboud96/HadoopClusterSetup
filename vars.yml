@@ -47,3 +47,4 @@ hadoop_hdfs_site_dfs_jn: "/var/lib/hadoop-hdfs/jn"
 hadoop_yarn_site_yarn_resourcemanager_hostname: "{{ groups['master'][0] }}"
 hadoop_yarn_site_yarn_nodemanager_aux_services: "mapreduce_shuffle"
 hadoop_yarn_site_yarn_nodemanager_aux_services_mapreduce_shuffle_class: "org.apache.hadoop.mapred.ShuffleHandler"
+path_to_keys: /home/hadoop/.ssh/id_rsa
