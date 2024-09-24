@@ -23,7 +23,7 @@
 - ## After running the ansible playbook
 - ### Start Hadoop Daemons
   -  Start the journalnode on all the nodes 
-     -    hdfs --daemon start journalnode
+     -     hdfs --daemon start journalnode
   - Format the active name node
     -     hdfs namenode -format
   - Start the namenode 
